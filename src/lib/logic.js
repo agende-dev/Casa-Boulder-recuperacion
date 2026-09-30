@@ -215,6 +215,9 @@ export function ajustarReloj(state, now, { deltaMin, reset }) {
 
 /** Persiste como vencidos los créditos activos cuya fecha ya pasó. */
 export function normalizar(state, now) {
+  // Con el reloj de prueba movido no se persiste nada: el estado "vencido" se calcula al vuelo
+  // y así se puede volver a la hora real sin perder créditos.
+  if (state.ajustes?.offsetMin) return state
   let cambio = false
   const creditos = state.creditos.map((c) => {
     if (estadoCredito(c, now) === 'vencido' && c.estado !== 'vencido') {
