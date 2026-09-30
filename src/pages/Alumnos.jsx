@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../store'
-import { NIVELES, PLANES } from '../lib/seed'
+import { NIVELES, PLANES, nt } from '../lib/seed'
 import { DIAS_CORTO, diffDias, fmtCLP, fmtDM, toISO } from '../lib/dates'
 import { estadoCredito, pasarDeNivel } from '../lib/logic'
 import { Badge, Boton, Card, Modal, NivelChip, Titulo, Vacio } from '../components/ui'
@@ -32,16 +32,16 @@ function PaseNivel({ alumno, onCerrar }) {
             variante="primario"
             disabled={sel.length !== cant}
             onClick={() => {
-              const r = act(pasarDeNivel, { alumnoId: alumno.id, nivel, clasesFijas: sel }, `${alumno.nombre.split(' ')[0]} ahora está en ${nivel}.`)
+              const r = act(pasarDeNivel, { alumnoId: alumno.id, nivel, clasesFijas: sel }, `${alumno.nombre.split(' ')[0]} ahora está en ${nt(nivel)}.`)
               if (!r.error) onCerrar()
             }}
           >
-            Confirmar pase a {nivel}
+            Confirmar pase a {nt(nivel)}
           </Boton>
         </>
       }
     >
-      <p><strong className="text-ink">{alumno.nombre}</strong> está en <strong>{alumno.nivel_actual}</strong>. Elige el nivel nuevo y {cant === 1 ? 'su clase fija' : `sus ${cant} clases fijas`} (plan {alumno.plan}).</p>
+      <p><strong className="text-ink">{alumno.nombre}</strong> está en <strong>{nt(alumno.nivel_actual)}</strong>. Elige el nivel nuevo y {cant === 1 ? 'su clase fija' : `sus ${cant} clases fijas`} (plan {alumno.plan}).</p>
       <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-graphite" htmlFor="nivel-nuevo">Nivel nuevo</label>
       <select
         id="nivel-nuevo"
@@ -78,8 +78,8 @@ function PaseNivel({ alumno, onCerrar }) {
 
       <p className="mt-4 rounded-xl bg-cement p-3">
         {pendientes > 0
-          ? `Sus ${pendientes} crédito${pendientes > 1 ? 's' : ''} vigente${pendientes > 1 ? 's' : ''} podrán usarse en clases de ${nivel}, con la misma fecha de vencimiento.`
-          : `No tiene créditos vigentes ahora; los que genere en adelante serán de ${nivel}.`}
+          ? `Sus ${pendientes} crédito${pendientes > 1 ? 's' : ''} vigente${pendientes > 1 ? 's' : ''} podrán usarse en clases de ${nt(nivel)}, con la misma fecha de vencimiento.`
+          : `No tiene créditos vigentes ahora; los que genere en adelante serán de ${nt(nivel)}.`}
       </p>
     </Modal>
   )
@@ -176,7 +176,7 @@ export default function Alumnos() {
           )
         })}
       </div>
-      {lista.length === 0 && <p className="mt-6 text-sm text-graphite">Ningún alumno en {nivel}.</p>}
+      {lista.length === 0 && <p className="mt-6 text-sm text-graphite">Ningún alumno de {nt(nivel)}.</p>}
 
       {pase && <PaseNivel alumno={pase} onCerrar={() => setPase(null)} />}
     </div>

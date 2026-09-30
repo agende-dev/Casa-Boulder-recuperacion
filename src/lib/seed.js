@@ -2,6 +2,9 @@ import { addDays, isoWeekday, toISO } from './dates'
 
 export const NIVELES = ['Iniciación', 'Básico', 'Intermedio', 'Avanzado', 'Niños']
 
+/** "nivel básico": para frases como "clase de nivel básico". */
+export const nt = (n) => `nivel ${n.toLowerCase()}`
+
 export const PLANES = {
   '1x': { id: '1x', nombre: '1 clase por semana', corto: '1x', precio: 48000, clases: 1 },
   '2x': { id: '2x', nombre: '2 clases por semana', corto: '2x', precio: 78000, clases: 2 },

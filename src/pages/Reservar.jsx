@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useApp } from '../store'
+import { nt } from '../lib/seed'
 import { diffDias, endHora, fmtCorto, fmtDM, fmtLargo, toISO } from '../lib/dates'
 import { estadoCredito, reservarRecuperacion, sesionesDisponibles } from '../lib/logic'
 import { Badge, Boton, Card, Icono, NivelChip, Presas, Seccion, Titulo, Vacio } from '../components/ui'
@@ -56,7 +57,7 @@ export default function Reservar({ query }) {
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-hold text-ink"><Icono n="check" className="h-7 w-7" /></span>
             <Titulo className="mt-3">¡Recuperación confirmada!</Titulo>
             <p className="mt-2 text-graphite">
-              <strong className="text-ink">{hecho.alumno.nombre}</strong> tiene lugar en {hecho.clase.nivel} el <strong className="text-ink">{fmtLargo(hecho.fecha)}</strong> a las <strong className="text-ink">{hecho.clase.hora}</strong>.
+              <strong className="text-ink">{hecho.alumno.nombre}</strong> tiene lugar en una clase de {nt(hecho.clase.nivel)} el <strong className="text-ink">{fmtLargo(hecho.fecha)}</strong> a las <strong className="text-ink">{hecho.clase.hora}</strong>.
             </p>
             <p className="mt-2 text-xs text-graphite/80">Se envió un aviso simulado por WhatsApp (no se conecta ningún servicio en esta demo). Puedes cancelar hasta 6 h antes para recuperar el crédito.</p>
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
@@ -78,7 +79,7 @@ export default function Reservar({ query }) {
       <Titulo>Reservar recuperación</Titulo>
       {pre && claseNivel && (
         <p className="mt-2 rounded-xl bg-white p-3 text-sm ring-1 ring-black/5">
-          Eligiendo lugar en la clase de <strong>{claseNivel}</strong> del {fmtCorto(pre.fecha)}. {esAlumno ? (miAlumno.nivel_actual === claseNivel ? 'Elige tu crédito y confirma.' : `Tu nivel es ${miAlumno.nivel_actual}: solo puedes recuperar en clases de tu nivel.`) : <>Solo aparecen alumnos de ese nivel. <a href="#/reservar" className="font-semibold text-hold-dark underline">Ver todos</a></>}
+          Eligiendo lugar en la clase de <strong>{nt(claseNivel)}</strong> del {fmtCorto(pre.fecha)}. {esAlumno ? (miAlumno.nivel_actual === claseNivel ? 'Elige tu crédito y confirma.' : `Tu nivel es ${miAlumno.nivel_actual.toLowerCase()}: solo puedes recuperar en clases de tu nivel.`) : <>Solo aparecen alumnos de ese nivel. <a href="#/reservar" className="font-semibold text-hold-dark underline">Ver todos</a></>}
         </p>
       )}
 
@@ -142,9 +143,9 @@ export default function Reservar({ query }) {
       )}
 
       {alumno && credito && (
-        <Seccion titulo={`3 · Elige la clase de ${alumno.nivel_actual}`} extra={<span className="text-xs text-graphite/80">Hasta el {fmtDM(credito.fecha_vencimiento)}</span>}>
+        <Seccion titulo={`3 · Elige la clase de ${nt(alumno.nivel_actual)}`} extra={<span className="text-xs text-graphite/80">Hasta el {fmtDM(credito.fecha_vencimiento)}</span>}>
           {opciones.length === 0 ? (
-            <Vacio titulo="No hay clases con cupo" texto={`No quedan clases futuras de ${alumno.nivel_actual} con lugar libre antes del vencimiento del crédito (${fmtDM(credito.fecha_vencimiento)}).`} />
+            <Vacio titulo="No hay clases con cupo" texto={`No quedan clases futuras de ${nt(alumno.nivel_actual)} con lugar libre antes del vencimiento del crédito (${fmtDM(credito.fecha_vencimiento)}).`} />
           ) : (
             <div className="space-y-4">
               {Object.entries(porDia).map(([fecha, lista]) => (

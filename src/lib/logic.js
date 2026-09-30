@@ -1,5 +1,5 @@
 import { addDays, startOf, toISO, isoWeekday } from './dates'
-import { PLANES, NIVELES } from './seed'
+import { PLANES, NIVELES, nt } from './seed'
 
 export const CUPO = 10
 export const HORAS_MIN = 6
@@ -151,7 +151,7 @@ export function reservarRecuperacion(state, now, { creditoId, claseId, fecha }) 
   if (estadoCredito(cr, now) !== 'activo') return fail('Ese crédito no está vigente.')
   const alumno = alumnoDe(state, cr.alumno_id)
   const clase = claseDe(state, claseId)
-  if (clase.nivel !== alumno.nivel_actual) return fail(`Solo se puede recuperar en clases de ${alumno.nivel_actual}.`)
+  if (clase.nivel !== alumno.nivel_actual) return fail(`Solo se puede recuperar en clases de ${nt(alumno.nivel_actual)}.`)
   if (startOf(fecha, clase.hora) <= now) return fail('Esa clase ya comenzó o pasó.')
   if (fecha > cr.fecha_vencimiento) return fail('La clase es posterior al vencimiento del crédito.')
   if (ocupacion(state, clase, fecha).libres <= 0) return fail('La clase se llenó: no quedan lugares libres.')

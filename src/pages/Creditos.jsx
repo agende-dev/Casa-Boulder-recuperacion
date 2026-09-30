@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../store'
+import { nt } from '../lib/seed'
 import { diffDias, fmtCorto, fmtDM, toISO } from '../lib/dates'
 import { cancelarReserva, estadoCredito, HORAS_MIN, horasHasta } from '../lib/logic'
 import { Badge, Boton, Card, Modal, NivelChip, Seccion, Titulo, Vacio } from '../components/ui'
@@ -31,7 +32,7 @@ function FilaCredito({ c, est, onCancelar }) {
       </dl>
       {est === 'consumido' && reserva && (
         <div className="mt-3 rounded-xl bg-cement/70 p-3 text-sm">
-          Usado en <strong>{claseUso?.nivel}</strong>, {fmtCorto(reserva.fecha)} a las {claseUso?.hora}.
+          Usado en una clase de <strong>{nt(claseUso?.nivel || '')}</strong>, {fmtCorto(reserva.fecha)} a las {claseUso?.hora}.
           <div className="mt-2 flex flex-wrap gap-2">
             <Boton as="a" href={`#/clase/${reserva.clase_id}/${reserva.fecha}`} variante="suave" tam="sm">Ver clase</Boton>
             {horasHasta(reserva.fecha, claseUso.hora, now) > 0 && (

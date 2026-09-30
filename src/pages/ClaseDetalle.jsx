@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../store'
+import { nt } from '../lib/seed'
 import { addDays, isoWeekday, endHora, fmtCorto, fmtDM, fmtDuracion, fmtLargo, startOf } from '../lib/dates'
 import { avisarAusencia, cancelarReserva, deshacerAsistencia, guardarNota, HORAS_MIN, horasHasta, marcarAusenteSinAviso, marcarPresente, ocupacion } from '../lib/logic'
 import { Badge, Boton, Card, Icono, Modal, NivelChip, Presas, Seccion, Titulo, Vacio } from '../components/ui'
@@ -183,7 +184,7 @@ export default function ClaseDetalle({ claseId, fecha }) {
                   <div>
                     <p className="font-semibold text-ink">{alumno.nombre}</p>
                     <p className="text-xs text-graphite/80">
-                      Recuperación · viene de {credito?.nivel_origen} · crédito vence el {fmtDM(credito?.fecha_vencimiento || fecha)}
+                      Recuperación · viene de {nt(credito?.nivel_origen || "")} · crédito vence el {fmtDM(credito?.fecha_vencimiento || fecha)}
                     </p>
                   </div>
                   <EstadoBadge asistencia={asistencia} />
@@ -243,7 +244,7 @@ export default function ClaseDetalle({ claseId, fecha }) {
       >
         {modal?.tipo === 'ausencia' && (
           <>
-            <p><strong className="text-ink">{modal.alumno.nombre}</strong> avisa que no asistirá a la clase {clase.nivel} del {fmtCorto(fecha)} a las {clase.hora}.</p>
+            <p><strong className="text-ink">{modal.alumno.nombre}</strong> avisa que no asistirá a la clase de {nt(clase.nivel)} del {fmtCorto(fecha)} a las {clase.hora}.</p>
             {horas >= HORAS_MIN ? (
               <p className="mt-3 rounded-xl bg-[#d5ead0] p-3 text-[#1f4a17]">
                 Faltan <strong>{fmtDuracion(horas)}</strong> (≥ {HORAS_MIN} h): se genera <strong>1 crédito</strong> que vence el <strong>{fmtCorto(addDays(fecha, 30))}</strong> y el lugar queda libre para otra recuperación.

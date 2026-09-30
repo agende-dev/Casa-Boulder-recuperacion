@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useApp } from '../store'
-import { NIVELES } from '../lib/seed'
+import { NIVELES, nt } from '../lib/seed'
 import { addDays, DIAS, DIAS_CORTO, endHora, fmtCorto, fmtDM, fmtDuracion, fmtLargo, mondayOf, parseISO, startOf, toISO } from '../lib/dates'
 import { avisarAusencia, getSesion, HORAS_MIN, ocupacion } from '../lib/logic'
 import { Badge, Boton, Icono, Modal, NivelChip, Presas, Titulo } from '../components/ui'
@@ -159,7 +159,7 @@ function ProximaClase() {
           </>
         }
       >
-        <p>No asistirás a la clase {clase.nivel} del <strong className="text-ink">{fmtLargo(fecha)}</strong> a las {clase.hora}.</p>
+        <p>No asistirás a la clase de {nt(clase.nivel)} del <strong className="text-ink">{fmtLargo(fecha)}</strong> a las {clase.hora}.</p>
         <p className="mt-3 rounded-xl bg-[#d5ead0] p-3 text-[#1f4a17]">
           Faltan <strong>{fmtDuracion(horas)}</strong>: recibes <strong>1 crédito</strong> válido por 30 días (hasta el {fmtCorto(addDays(fecha, 30))}) para recuperar en otra clase de tu nivel.
         </p>
@@ -312,7 +312,7 @@ export default function Panel() {
               </div>
               {lista.length === 0 && (
                 <p className="rounded-xl border-2 border-dashed border-cement-dark px-3 py-6 text-center text-sm text-graphite/70 md:py-4 md:text-xs">
-                  Sin clases {nivel !== 'Todos' ? `de ${nivel} ` : ''}este día
+                  Sin clases {nivel !== 'Todos' ? `de ${nt(nivel)} ` : ''}este día
                 </p>
               )}
             </section>
