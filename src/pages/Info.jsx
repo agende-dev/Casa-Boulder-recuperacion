@@ -49,11 +49,11 @@ export default function Info() {
         <Card className="p-5">
           <h2 className="font-display text-xl font-semibold uppercase text-graphite">Cómo funcionan las recuperaciones</h2>
           <ul className="mt-3 space-y-2.5 text-sm text-graphite">
-            <li className="flex gap-2"><Icono n="check" className="mt-0.5 h-4 w-4 shrink-0 text-hold-dark" /> Avisar con <strong>6 h o más</strong>: genera un crédito y libera tu lugar.</li>
-            <li className="flex gap-2"><Icono n="check" className="mt-0.5 h-4 w-4 shrink-0 text-hold-dark" /> Avisar con <strong>menos de 6 h</strong> o no venir: no genera crédito.</li>
-            <li className="flex gap-2"><Icono n="check" className="mt-0.5 h-4 w-4 shrink-0 text-hold-dark" /> El crédito vence <strong>30 días</strong> después de la clase a la que faltaste.</li>
-            <li className="flex gap-2"><Icono n="check" className="mt-0.5 h-4 w-4 shrink-0 text-hold-dark" /> Solo se recupera en clases de <strong>tu nivel actual</strong> con cupo disponible.</li>
-            <li className="flex gap-2"><Icono n="check" className="mt-0.5 h-4 w-4 shrink-0 text-hold-dark" /> Cancelar una recuperación con 6 h o más devuelve el crédito.</li>
+            <li className="flex gap-2"><Icono n="check" className="mt-0.5 h-4 w-4 shrink-0 text-hold-dark" /><span>Avisar con <strong>6 h o más</strong>: genera un crédito y libera tu lugar.</span></li>
+            <li className="flex gap-2"><Icono n="check" className="mt-0.5 h-4 w-4 shrink-0 text-hold-dark" /><span>Avisar con <strong>menos de 6 h</strong> o no venir: no genera crédito.</span></li>
+            <li className="flex gap-2"><Icono n="check" className="mt-0.5 h-4 w-4 shrink-0 text-hold-dark" /><span>El crédito vence <strong>30 días</strong> después de la clase a la que faltaste.</span></li>
+            <li className="flex gap-2"><Icono n="check" className="mt-0.5 h-4 w-4 shrink-0 text-hold-dark" /><span>Solo se recupera en clases de <strong>tu nivel actual</strong> con cupo disponible.</span></li>
+            <li className="flex gap-2"><Icono n="check" className="mt-0.5 h-4 w-4 shrink-0 text-hold-dark" /><span>Cancelar una recuperación con 6 h o más devuelve el crédito.</span></li>
           </ul>
         </Card>
 
