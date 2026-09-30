@@ -1,9 +1,76 @@
 import { useMemo, useState } from 'react'
 import { useApp } from '../store'
 import { NIVELES } from '../lib/seed'
-import { addDays, DIAS, DIAS_CORTO, endHora, fmtDM, mondayOf, parseISO, startOf, toISO } from '../lib/dates'
+import { addDays, DIAS, DIAS_CORTO, endHora, fmtCorto, fmtDM, mondayOf, parseISO, startOf, toISO } from '../lib/dates'
 import { ocupacion } from '../lib/logic'
 import { Icono, NivelChip, Presas, Titulo } from '../components/ui'
+
+const GUIA_KEY = 'casaboulder.guia.v1'
+const leerGuia = () => {
+  try { return window.localStorage.getItem(GUIA_KEY) === 'oculta' } catch { return false }
+}
+const guardarGuia = (v) => {
+  try { v ? window.localStorage.setItem(GUIA_KEY, 'oculta') : window.localStorage.removeItem(GUIA_KEY) } catch { /* sin almacenamiento */ }
+}
+
+/** Primera clase futura con alumnos fijos y más de 6 h de anticipación: sirve para probar el aviso de ausencia. */
+function claseDePrueba(state, now, rol, miAlumno) {
+  for (let i = 0; i < 14; i++) {
+    const fecha = addDays(toISO(now), i)
+    for (const c of state.clases) {
+      if (c.dia_semana !== (parseISO(fecha).getDay() || 7)) continue
+      const tiene = rol === 'alumno' ? miAlumno.clases_fijas.includes(c.id) : state.alumnos.some((a) => a.clases_fijas.includes(c.id))
+      if (tiene && (startOf(fecha, c.hora) - now) / 36e5 >= 6) return { c, fecha }
+    }
+  }
+  return null
+}
+
+function GuiaDemo({ onCerrar }) {
+  const { state, now, rol, miAlumno } = useApp()
+  const p = claseDePrueba(state, now, rol, miAlumno)
+  const alumno = rol === 'alumno'
+  const pasos = alumno
+    ? [
+        ['Abre tu clase', 'Toca una tarjeta marcada "Tu clase".'],
+        ['Avisa que no vas', 'Con 6 h o más de anticipación recibes un crédito y tu lugar queda libre.'],
+        ['Recupera', 'En "Recuperar" elige otra clase de tu nivel con lugar y confirma.'],
+      ]
+    : [
+        ['Abre una clase', 'Toca cualquier tarjeta para ver fijos, recuperaciones y lugares libres.'],
+        ['Avisa una ausencia', 'Con 6 h o más genera un crédito; con menos, no. Usa el reloj de prueba en "El gimnasio" para comparar.'],
+        ['Reserva la recuperación', 'En "Recuperar" elige alumno, crédito y una clase de su nivel con cupo.'],
+      ]
+  return (
+    <section className="mt-5 rounded-2xl bg-graphite p-4 text-white sm:p-5" aria-label="Guía de la demo">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-display text-sm font-medium uppercase tracking-[0.2em] text-hold">Demo · 1 minuto</p>
+          <h2 className="font-display text-2xl font-semibold uppercase leading-tight">{alumno ? `Hola, ${miAlumno.nombre.split(' ')[0]}. Prueba una recuperación` : 'Prueba el flujo completo'}</h2>
+        </div>
+        <button onClick={onCerrar} aria-label="Cerrar guía" className="-mr-2 -mt-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white/80 hover:bg-white/10">
+          <Icono n="x" />
+        </button>
+      </div>
+      <ol className="mt-3 grid gap-3 md:grid-cols-3">
+        {pasos.map(([t, d], i) => (
+          <li key={t} className="flex gap-3">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-hold font-display text-base font-semibold text-ink">{i + 1}</span>
+            <span className="text-sm leading-snug"><strong className="block text-white">{t}</strong><span className="text-white/80">{d}</span></span>
+          </li>
+        ))}
+      </ol>
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        {p && (
+          <a href={`#/clase/${p.c.id}/${p.fecha}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-hold px-4 text-sm font-semibold text-ink hover:bg-[#f27a38]">
+            Probar con la clase del {fmtCorto(p.fecha)} {p.c.hora} <Icono n="flecha" className="h-4 w-4" />
+          </a>
+        )}
+        <button onClick={onCerrar} className="min-h-11 rounded-xl border border-white/30 px-4 text-sm font-semibold text-white hover:bg-white/10">Entendido</button>
+      </div>
+    </section>
+  )
+}
 
 function TarjetaClase({ clase, fecha }) {
   const { state, now, rol, miAlumno } = useApp()
@@ -47,6 +114,8 @@ export default function Panel() {
   const [semana, setSemana] = useState(() => mondayOf(hoy))
   const [nivel, setNivel] = useState('Todos')
   const [dia, setDia] = useState(hoy)
+  const [guiaOculta, setGuiaOculta] = useState(leerGuia)
+  const cerrarGuia = () => { guardarGuia(true); setGuiaOculta(true) }
 
   const dias = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(semana, i)), [semana])
   const diaActivo = dias.includes(dia) ? dia : dias[0]
@@ -88,6 +157,8 @@ export default function Panel() {
           </button>
         </div>
       </div>
+
+      {!guiaOculta && <GuiaDemo onCerrar={cerrarGuia} />}
 
       <div className="-mx-4 mt-5 overflow-x-auto px-4" role="group" aria-label="Filtrar por nivel">
         <div className="flex w-max gap-2 pb-1">
@@ -152,7 +223,12 @@ export default function Panel() {
         })}
       </div>
 
-      <p className="mt-6 text-xs text-graphite/70">
+      {guiaOculta && (
+        <button onClick={() => { guardarGuia(false); setGuiaOculta(false); window.scrollTo(0, 0) }} className="mt-6 min-h-11 text-sm font-semibold text-hold-dark underline">
+          Ver la guía de la demo
+        </button>
+      )}
+      <p className="mt-2 text-xs text-graphite/70">
         Cada círculo es un lugar: <span className="font-semibold">oscuro</span> = ocupado, <span className="font-semibold text-hold-dark">naranja</span> = libre. Lugares libres = 10 − fijos sin aviso − recuperaciones reservadas.
       </p>
     </div>

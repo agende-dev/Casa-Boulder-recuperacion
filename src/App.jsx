@@ -39,8 +39,8 @@ export default function App() {
   return (
     <div className="cemento min-h-dvh">
       <header className="sticky top-0 z-30 bg-graphite text-white">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
-          <a href="#/" className="flex items-center gap-2.5">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
+          <a href="#/" className="flex shrink-0 items-center gap-2.5">
             <Logo />
             <span className="font-display text-xl font-semibold uppercase leading-none tracking-wide">
               Casa Boulder
@@ -59,39 +59,34 @@ export default function App() {
               </a>
             ))}
           </nav>
-        </div>
-      </header>
-
-      <div className="border-b border-black/10 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
-          <div role="group" aria-label="Vista de la app" className="flex rounded-xl bg-cement p-1">
+          <div role="group" aria-label="Vista de la app" className="flex shrink-0 rounded-lg bg-white/10 p-0.5">
             {[['recepcion', 'Recepción'], ['alumno', 'Alumno']].map(([r, t]) => (
               <button
                 key={r}
                 aria-pressed={rol === r}
                 onClick={() => rol !== r && act(cambiarVista, { rol: r }, r === 'alumno' ? `Vista alumno: ${miAlumno.nombre}` : 'Vista recepción')}
-                className={`min-h-10 rounded-lg px-4 text-sm font-semibold transition-colors ${rol === r ? 'bg-graphite text-white' : 'text-graphite hover:bg-white/70'}`}
+                className={`min-h-11 rounded-md px-3 text-xs font-semibold transition-colors sm:text-sm ${rol === r ? 'bg-hold text-ink' : 'text-white/85 hover:bg-white/10'}`}
               >
                 {t}
               </button>
             ))}
           </div>
-          {rol === 'alumno' ? (
-            <label className="flex min-w-0 flex-1 items-center gap-2 text-xs font-semibold uppercase tracking-wide text-graphite">
+        </div>
+        {rol === 'alumno' && (
+          <div className="border-t border-white/10 bg-ink/40">
+            <label className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white/80">
               <span className="shrink-0">Soy</span>
               <select
                 value={miAlumno.id}
                 onChange={(e) => act(cambiarVista, { rol: 'alumno', alumnoId: e.target.value })}
-                className="min-h-10 min-w-0 flex-1 rounded-lg border border-cement-dark bg-white px-2 text-sm font-normal normal-case tracking-normal text-ink sm:max-w-xs"
+                className="min-h-10 min-w-0 flex-1 rounded-lg border border-white/20 bg-white px-2 text-sm font-normal normal-case tracking-normal text-ink sm:max-w-xs sm:flex-none"
               >
                 {state.alumnos.map((a) => <option key={a.id} value={a.id}>{a.nombre}</option>)}
               </select>
             </label>
-          ) : (
-            <p className="text-xs text-graphite/80">Vista completa de gestión</p>
-          )}
-        </div>
-      </div>
+          </div>
+        )}
+      </header>
 
       {!storageOk && (
         <div role="alert" className="border-b border-[#e2b3a9] bg-[#fbeae6] px-4 py-3 text-sm text-[#7a1d0e]">
