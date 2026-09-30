@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useApp } from '../store'
 import { NIVELES, PLANES, nt } from '../lib/seed'
 import { DIAS_CORTO, diffDias, fmtCLP, fmtDM, toISO } from '../lib/dates'
-import { estadoCredito, pasarDeNivel } from '../lib/logic'
-import { Badge, Boton, Card, Modal, NivelChip, Titulo, Vacio } from '../components/ui'
+import { crearAlumno, cupoFijoLibre, eliminarAlumno, estadoCredito, impactoEliminar, pasarDeNivel } from '../lib/logic'
+import { Badge, Boton, Card, Icono, Modal, NivelChip, Titulo, Vacio } from '../components/ui'
 
 export function etiquetaClase(c) {
   return `${DIAS_CORTO[c.dia_semana - 1]} ${c.hora}`
@@ -85,9 +85,137 @@ function PaseNivel({ alumno, onCerrar }) {
   )
 }
 
+function NuevoAlumno({ onCerrar }) {
+  const { state, act } = useApp()
+  const [nombre, setNombre] = useState('')
+  const [telefono, setTelefono] = useState('')
+  const [nivel, setNivel] = useState('Iniciación')
+  const [plan, setPlan] = useState('1x')
+  const [sel, setSel] = useState([])
+  const [intento, setIntento] = useState(false)
+  const cant = PLANES[plan].clases
+  const clases = state.clases.filter((c) => c.nivel === nivel).sort((a, b) => a.dia_semana - b.dia_semana || a.hora.localeCompare(b.hora))
+
+  const errores = {
+    nombre: nombre.trim().length < 3 ? 'Escribe el nombre completo.' : state.alumnos.some((a) => a.nombre.toLowerCase() === nombre.trim().replace(/\s+/g, ' ').toLowerCase()) ? 'Ya existe un alumno con ese nombre.' : '',
+    clases: sel.length !== cant ? `Elige ${cant === 1 ? 'la clase fija' : `las ${cant} clases fijas`} (${sel.length}/${cant}).` : '',
+  }
+  const toggle = (id) => setSel((s) => (s.includes(id) ? s.filter((x) => x !== id) : s.length < cant ? [...s, id] : [...s.slice(1), id]))
+  const cambiarPlan = (p) => {
+    setPlan(p)
+    setSel((s) => s.slice(0, PLANES[p].clases))
+  }
+  const guardar = () => {
+    setIntento(true)
+    if (errores.nombre || errores.clases) return
+    const r = act(crearAlumno, { nombre, telefono, nivel, plan, clasesFijas: sel }, (x) => `Ficha creada: ${x.alumno.nombre}.`)
+    if (!r.error) onCerrar()
+  }
+  const campo = 'mt-1 min-h-12 w-full rounded-xl border border-cement-dark bg-white px-3 text-base'
+
+  return (
+    <Modal
+      abierto
+      onCerrar={onCerrar}
+      titulo="Nueva ficha de alumno"
+      pie={
+        <>
+          <Boton variante="suave" onClick={onCerrar}>Cancelar</Boton>
+          <Boton variante="primario" onClick={guardar}>Crear ficha</Boton>
+        </>
+      }
+    >
+      <label className="block text-xs font-semibold uppercase tracking-wide text-graphite" htmlFor="al-nombre">Nombre completo *</label>
+      <input id="al-nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} autoComplete="off" placeholder="Ej: Antonia Valdés" className={campo} aria-invalid={intento && !!errores.nombre} />
+      {intento && errores.nombre && <p className="mt-1 text-xs font-semibold text-[#9b2a14]">{errores.nombre}</p>}
+
+      <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-graphite" htmlFor="al-tel">Teléfono (opcional)</label>
+      <input id="al-tel" type="tel" inputMode="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="+56 9 5550 0000" className={campo} />
+
+      <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-graphite" htmlFor="al-nivel">Nivel *</label>
+      <select id="al-nivel" value={nivel} onChange={(e) => { setNivel(e.target.value); setSel([]) }} className={campo}>
+        {NIVELES.map((n) => <option key={n}>{n}</option>)}
+      </select>
+
+      <fieldset className="mt-4">
+        <legend className="text-xs font-semibold uppercase tracking-wide text-graphite">Plan *</legend>
+        <div className="mt-1 grid grid-cols-2 gap-2">
+          {Object.values(PLANES).map((p) => (
+            <button key={p.id} type="button" role="radio" aria-checked={plan === p.id} onClick={() => cambiarPlan(p.id)} className={`min-h-14 rounded-xl border-2 px-3 text-left ${plan === p.id ? 'border-hold bg-[#fdeadd]' : 'border-cement-dark bg-white'}`}>
+              <span className="block text-sm font-semibold text-ink">{p.corto} por semana</span>
+              <span className="text-xs text-graphite/80">{fmtCLP(p.precio)} /mes</span>
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset className="mt-4">
+        <legend className="text-xs font-semibold uppercase tracking-wide text-graphite">Clase{cant > 1 ? 's' : ''} fija{cant > 1 ? 's' : ''} * ({sel.length}/{cant})</legend>
+        <div className="mt-1 grid grid-cols-2 gap-2">
+          {clases.map((c) => {
+            const on = sel.includes(c.id)
+            const llena = cupoFijoLibre(state, c) <= 0
+            return (
+              <button key={c.id} type="button" role="checkbox" aria-checked={on} disabled={llena} onClick={() => toggle(c.id)} className={`min-h-12 rounded-xl border-2 px-3 text-left text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${on ? 'border-hold bg-[#fdeadd]' : 'border-cement-dark bg-white'}`}>
+                {etiquetaClase(c)}
+                {llena && <span className="block text-xs font-normal text-graphite/80">Sin cupo fijo</span>}
+              </button>
+            )
+          })}
+        </div>
+        {intento && errores.clases && <p className="mt-1 text-xs font-semibold text-[#9b2a14]">{errores.clases}</p>}
+      </fieldset>
+    </Modal>
+  )
+}
+
+function EliminarAlumno({ alumno, onCerrar }) {
+  const { state, act } = useApp()
+  const imp = impactoEliminar(state, alumno.id)
+  const ultimo = state.alumnos.length <= 1
+  return (
+    <Modal
+      abierto
+      onCerrar={onCerrar}
+      titulo="Eliminar ficha"
+      pie={
+        <>
+          <Boton variante="suave" onClick={onCerrar}>Conservar ficha</Boton>
+          <Boton
+            variante="peligro"
+            disabled={ultimo}
+            onClick={() => {
+              const r = act(eliminarAlumno, { alumnoId: alumno.id }, (x) => `Ficha eliminada: ${x.nombre}.`)
+              if (!r.error) onCerrar()
+            }}
+          >
+            Sí, eliminar
+          </Boton>
+        </>
+      }
+    >
+      <p>Vas a eliminar la ficha de <strong className="text-ink">{alumno.nombre}</strong>. Esta acción no se puede deshacer.</p>
+      <ul className="mt-3 list-disc space-y-1 pl-5">
+        <li>Se liberan sus lugares en las clases fijas.</li>
+        <li>
+          Se {imp.creditos === 1 ? 'borra su crédito' : `borran sus ${imp.creditos} créditos`} y su historial de asistencia.
+        </li>
+        {imp.reservas > 0 && (
+          <li>
+            {imp.reservas === 1 ? 'Se cancela su recuperación reservada y queda libre ese lugar.' : `Se cancelan sus ${imp.reservas} recuperaciones reservadas y quedan libres esos lugares.`}
+          </li>
+        )}
+      </ul>
+      {ultimo && <p className="mt-3 rounded-xl bg-[#f6d3cc] p-3 text-[#7a1d0e]">Debe quedar al menos un alumno en la demo.</p>}
+    </Modal>
+  )
+}
+
 export default function Alumnos() {
   const { state, now, rol } = useApp()
   const [pase, setPase] = useState(null)
+  const [nuevo, setNuevo] = useState(false)
+  const [borrar, setBorrar] = useState(null)
   const [nivel, setNivel] = useState('Todos')
   const hoy = toISO(now)
   const lista = state.alumnos.filter((a) => nivel === 'Todos' || a.nivel_actual === nivel)
@@ -101,8 +229,15 @@ export default function Alumnos() {
 
   return (
     <div>
-      <p className="font-display text-sm font-medium uppercase tracking-[0.2em] text-hold-dark">Cursos fijos</p>
-      <Titulo>Alumnos</Titulo>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="font-display text-sm font-medium uppercase tracking-[0.2em] text-hold-dark">Cursos fijos · {state.alumnos.length} alumnos</p>
+          <Titulo>Alumnos</Titulo>
+        </div>
+        <Boton variante="primario" onClick={() => setNuevo(true)} className="w-full sm:w-auto">
+          <Icono n="reservar" className="h-4 w-4" /> Nuevo alumno
+        </Boton>
+      </div>
 
       <div className="-mx-4 mt-4 overflow-x-auto px-4" role="group" aria-label="Filtrar por nivel">
         <div className="flex w-max gap-2 pb-1">
@@ -172,6 +307,9 @@ export default function Alumnos() {
                 <Boton as="a" href={`#/creditos/${a.id}`} variante="suave" tam="sm">Ver créditos</Boton>
                 <Boton variante="oscuro" tam="sm" onClick={() => setPase(a)}>Registrar pase de nivel</Boton>
               </div>
+              <button onClick={() => setBorrar(a)} className="mt-2 min-h-11 w-full rounded-xl text-sm font-semibold text-[#9b2a14] hover:bg-[#fbeae6]">
+                Eliminar ficha
+              </button>
             </Card>
           )
         })}
@@ -179,6 +317,8 @@ export default function Alumnos() {
       {lista.length === 0 && <p className="mt-6 text-sm text-graphite">Ningún alumno de {nt(nivel)}.</p>}
 
       {pase && <PaseNivel alumno={pase} onCerrar={() => setPase(null)} />}
+      {nuevo && <NuevoAlumno onCerrar={() => setNuevo(false)} />}
+      {borrar && <EliminarAlumno alumno={borrar} onCerrar={() => setBorrar(null)} />}
     </div>
   )
 }

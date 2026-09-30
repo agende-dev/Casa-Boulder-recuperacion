@@ -208,6 +208,57 @@ export function cambiarVista(state, now, { rol, alumnoId }) {
   return { state: { ...state, ajustes: { ...state.ajustes, rol, alumnoId: alumnoId || state.ajustes.alumnoId || state.alumnos[0].id } } }
 }
 
+/** ¿Cuántos lugares fijos quedan en la clase? (cupo − alumnos fijos con ficha − fijos sin ficha) */
+export const cupoFijoLibre = (state, clase) =>
+  clase.cupo - (clase.externos || 0) - state.alumnos.filter((a) => a.clases_fijas.includes(clase.id)).length
+
+export function crearAlumno(state, now, { nombre, telefono, nivel, plan, clasesFijas }) {
+  const n = (nombre || '').trim().replace(/\s+/g, ' ')
+  if (n.length < 3) return fail('Escribe el nombre completo del alumno.')
+  if (state.alumnos.some((a) => a.nombre.toLowerCase() === n.toLowerCase())) return fail('Ya existe un alumno con ese nombre.')
+  if (!NIVELES.includes(nivel)) return fail('Elige un nivel.')
+  if (!PLANES[plan]) return fail('Elige un plan.')
+  const cant = PLANES[plan].clases
+  if (clasesFijas.length !== cant) return fail(`El plan ${plan} requiere elegir ${cant} clase${cant > 1 ? 's' : ''} fija${cant > 1 ? 's' : ''}.`)
+  for (const id of clasesFijas) {
+    const c = claseDe(state, id)
+    if (!c || c.nivel !== nivel) return fail('Las clases fijas deben ser del nivel elegido.')
+    if (cupoFijoLibre(state, c) <= 0) return fail('Una de las clases elegidas ya no tiene cupo para alumnos fijos.')
+  }
+  const alumno = { id: uid('al'), nombre: n, telefono: (telefono || '').trim(), nivel_actual: nivel, plan, clases_fijas: [...clasesFijas], pases: [], alta: toISO(now) }
+  return { state: { ...state, alumnos: [...state.alumnos, alumno] }, alumno }
+}
+
+/** Resumen de lo que se borra junto con la ficha. */
+export function impactoEliminar(state, alumnoId) {
+  return {
+    creditos: state.creditos.filter((c) => c.alumno_id === alumnoId).length,
+    reservas: state.reservas.filter((r) => r.alumno_id === alumnoId && r.estado === 'reservada').length,
+  }
+}
+
+export function eliminarAlumno(state, now, { alumnoId }) {
+  const a = alumnoDe(state, alumnoId)
+  if (!a) return fail('El alumno ya no existe.')
+  if (state.alumnos.length <= 1) return fail('Debe quedar al menos un alumno en la demo.')
+  const alumnos = state.alumnos.filter((x) => x.id !== alumnoId)
+  const sesiones = state.sesiones
+    .map((s) => ({ ...s, asistencias: s.asistencias.filter((x) => x.alumno_id !== alumnoId) }))
+    .filter((s) => s.asistencias.length > 0)
+  const ajustes = state.ajustes.alumnoId === alumnoId ? { ...state.ajustes, alumnoId: alumnos[0].id } : state.ajustes
+  return {
+    state: {
+      ...state,
+      alumnos,
+      ajustes,
+      sesiones,
+      creditos: state.creditos.filter((c) => c.alumno_id !== alumnoId),
+      reservas: state.reservas.filter((r) => r.alumno_id !== alumnoId),
+    },
+    nombre: a.nombre,
+  }
+}
+
 export function ajustarReloj(state, now, { deltaMin, reset }) {
   const offsetMin = reset ? 0 : (state.ajustes.offsetMin || 0) + deltaMin
   return { state: { ...state, ajustes: { ...state.ajustes, offsetMin } } }

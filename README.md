@@ -42,7 +42,8 @@ completo en el navegador: no hay backend ni servicios externos conectados (ver
 6. **Créditos** muestra, por alumno, los créditos activos, vencidos y
    consumidos con su origen y vencimiento.
 7. **Alumnos** (solo Recepción) lista nivel, plan y créditos vigentes, y permite
-   "Registrar pase de nivel".
+   "Registrar pase de nivel", crear una **ficha nueva** ("Nuevo alumno") y
+   **eliminar** una ficha existente.
 8. **Sobre Nosotros** es la página informativa: qué es Casa Boulder, cómo
    funcionan las recuperaciones, planes, horario, cómo llegar y redes. Al final
    tiene el "Modo demostración".
@@ -197,6 +198,16 @@ movido aparece un aviso arriba; "Volver a la hora real" lo restablece.
 - **Sobre Nosotros**: la página informativa reemplazó el nombre "El gimnasio". En
   celular el nombre se muestra en dos líneas en la barra inferior, para que no se
   recorte.
+- **Nuevo alumno** (solo Recepción): pide nombre completo (mínimo 3 letras, sin
+  repetir uno existente), nivel, plan y las clases fijas que exige el plan (una
+  para 1x, dos para 2x). El teléfono es opcional. Una clase fija que ya tiene los
+  10 lugares ocupados por fijos aparece deshabilitada ("Sin cupo fijo"), para no
+  sobrecargar el curso. La ficha nueva empieza sin créditos.
+- **Eliminar ficha** (solo Recepción): pide confirmación y muestra qué se borra:
+  sus créditos, su historial de asistencia y sus recuperaciones reservadas (esos
+  lugares quedan libres de inmediato). No se puede deshacer y no deja borrar al
+  último alumno de la demo. Si se elimina al alumno que está activo en la vista
+  Alumno, la vista pasa a otro alumno.
 - **Notas de progreso**: Recepción puede dejar una nota por alumno presente.
 - **Mapa y redes**: el mapa es un embed de OpenStreetMap y los botones de redes
   muestran un aviso simulado.
@@ -213,8 +224,9 @@ movido aparece un aviso arriba; "Volver a la hora real" lo restablece.
 
 ## Criterios verificados
 
-Verificados con pruebas automáticas sobre `src/lib/logic.js` (33 casos, incluidos
-los bordes de exactamente 6 h y de 5 h 59 min) y con pruebas en el navegador.
+Verificados con pruebas automáticas sobre `src/lib/logic.js` (46 casos, incluidos
+los bordes de exactamente 6 h y de 5 h 59 min, y el alta y baja de alumnos) y
+con pruebas en el navegador.
 
 - Avisar ausencia con 6 h o más genera un crédito con vencimiento a fecha de
   clase + 30 días y libera el lugar; con menos de 6 h no genera crédito.
