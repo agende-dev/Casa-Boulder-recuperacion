@@ -44,10 +44,7 @@ export default function App() {
             <Logo />
             <span className="inline-flex flex-col font-display uppercase leading-none">
               <span className="text-xl font-semibold tracking-wide">Casa Boulder</span>
-              {/* "CLUB" repartido de borde a borde para quedar alineado con el ancho del nombre */}
-              <span className="mt-1 flex justify-between text-[11px] font-medium text-hold" aria-label="Club">
-                {'CLUB'.split('').map((l, i) => <span key={i} aria-hidden="true">{l}</span>)}
-              </span>
+              <span className="mt-1 text-[11px] font-medium tracking-[0.2em] text-hold">Club</span>
             </span>
           </a>
           <nav className="hidden items-center gap-1 md:flex" aria-label="Principal">
