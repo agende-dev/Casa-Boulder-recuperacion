@@ -38,7 +38,7 @@ function GuiaDemo({ onCerrar }) {
       ]
     : [
         ['Abre una clase', 'Toca cualquier tarjeta para ver fijos, recuperaciones y lugares libres.'],
-        ['Avisa una ausencia', 'Con 6 h o más genera un crédito; con menos, no. Usa el reloj de prueba en "El gimnasio" para comparar.'],
+        ['Avisa una ausencia', 'Con 6 h o más genera un crédito; con menos, no. Usa el reloj de prueba en "Sobre Nosotros" para comparar.'],
         ['Reserva la recuperación', 'En "Recuperar" elige alumno, crédito y una clase de su nivel con cupo.'],
       ]
   return (

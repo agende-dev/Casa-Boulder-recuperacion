@@ -30,7 +30,7 @@ export default function Info() {
 
   return (
     <div>
-      <p className="font-display text-sm font-medium uppercase tracking-[0.2em] text-hold-dark">El gimnasio</p>
+      <p className="font-display text-sm font-medium uppercase tracking-[0.2em] text-hold-dark">Sobre Nosotros</p>
       <Titulo>Casa Boulder</Titulo>
 
       <Card className="mt-4 overflow-hidden">

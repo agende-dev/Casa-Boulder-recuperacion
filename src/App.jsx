@@ -14,7 +14,7 @@ const NAV = [
   { to: '/alumnos', etiqueta: 'Alumnos', icono: 'gente', soloRecepcion: true, activo: (p) => p.startsWith('/alumnos') },
   { to: '/reservar', etiqueta: 'Recuperar', icono: 'reservar', activo: (p) => p.startsWith('/reservar') },
   { to: '/creditos', etiqueta: 'Créditos', icono: 'credito', activo: (p) => p.startsWith('/creditos') },
-  { to: '/info', etiqueta: 'El gimnasio', icono: 'info', activo: (p) => p.startsWith('/info') },
+  { to: '/info', etiqueta: 'Sobre Nosotros', icono: 'info', activo: (p) => p.startsWith('/info') },
 ]
 
 function Pagina({ route }) {
@@ -123,7 +123,7 @@ export default function App() {
                   className={`flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[11px] font-semibold ${on ? 'text-hold' : 'text-white/75'}`}
                 >
                   <Icono n={n.icono} className="h-5 w-5" />
-                  <span className="max-w-full truncate">{n.etiqueta}</span>
+                  <span className="max-w-full text-center leading-[1.1]">{n.etiqueta}</span>
                 </a>
               </li>
             )

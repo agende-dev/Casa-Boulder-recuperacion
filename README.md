@@ -37,7 +37,7 @@ completo en el navegador: no hay backend ni servicios externos conectados (ver
    consumidos con su origen y vencimiento.
 6. **Alumnos** (solo Recepción) lista nivel, plan y créditos vigentes, y permite
    "Registrar pase de nivel".
-7. **El gimnasio** es la página informativa: qué es Casa Boulder, cómo llegar,
+7. **Sobre Nosotros** es la página informativa: qué es Casa Boulder, cómo llegar,
    planes, horario y redes.
 
 ## Cómo arrancar el proyecto
@@ -126,7 +126,7 @@ Navegación por hash (`#/`, `#/clase/:claseId/:fecha`, `#/alumnos`, `#/reservar`
 
 Dos maneras:
 
-1. **Desde la app**: en "El gimnasio" → "Modo demostración", tocá "Reiniciar
+1. **Desde la app**: en "Sobre Nosotros" → "Modo demostración", tocá "Reiniciar
    datos de ejemplo" y confirmá. Reemplaza todo por el set original.
 2. **Manualmente**: en las herramientas de desarrollador del navegador,
    ejecutá `localStorage.removeItem('casaboulder.recuperaciones.v1')` y
