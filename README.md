@@ -115,8 +115,10 @@ Navegación por hash (`#/`, `#/clase/:claseId/:fecha`, `#/alumnos`, `#/reservar`
   base de datos: cada navegador tiene sus propios datos. Si el navegador bloquea
   el almacenamiento, aparece un aviso y la app sigue funcionando solo en memoria.
 - **Acceso**: no hay login. El selector Recepción / Alumno es solo una
-  separación de interfaz para la demo; cualquiera puede cambiar de vista.
-  Kodarvia debe integrar autenticación y permisos reales del lado del servidor.
+  separación de interfaz para la demo; cualquiera puede cambiar de vista, y los
+  datos de todos los alumnos están en el `localStorage` del navegador. **Kodarvia
+  debe implementar la autenticación y los permisos reales del lado del
+  servidor** (ver "Autenticación y permisos pendientes" más abajo).
 - **Integraciones**: no hay correo, WhatsApp ni pagos. El aviso "por WhatsApp"
   al confirmar una recuperación y los botones de redes son solo texto o avisos
   simulados.
@@ -221,6 +223,41 @@ movido aparece un aviso arriba; "Volver a la hora real" lo restablece.
   `Sesion {clase_id, fecha, asistencias[]}` · `Credito {id, alumno_id,
   nivel_origen, fecha_generacion, fecha_vencimiento, estado}` · `Reserva
   {credito_id, sesion_id, alumno_id, estado}`.
+
+### Autenticación y permisos pendientes (a cargo de Kodarvia)
+
+Hoy la interfaz oculta botones y pantallas según la vista elegida, pero **nada
+está protegido**: ocultar un botón no es un control de acceso. Al integrar el
+backend, el servidor debe identificar al usuario (recepción o alumno) y hacer
+cumplir lo siguiente en cada llamada, sin confiar en lo que envíe el navegador:
+
+| Acción | Recepción | Alumno |
+|---|---|---|
+| Ver el panel semanal y los lugares libres | Sí | Sí (solo cifras de ocupación) |
+| Ver lista de alumnos, teléfonos y planes | Sí | No |
+| Ver nombres de otros alumnos en una clase (fijos y recuperaciones) | Sí | No |
+| Ver créditos y reservas | De cualquier alumno | Solo los propios |
+| Avisar ausencia | De cualquier alumno | Solo de sus propias clases fijas |
+| Reservar y cancelar recuperaciones | Para cualquier alumno | Solo con sus propios créditos |
+| Marcar presente / ausente sin aviso, notas de progreso, deshacer registros | Sí | No |
+| Crear ficha, eliminar ficha, registrar pase de nivel | Sí | No |
+| Reloj de prueba y reinicio de datos | No existen en producción | No existen en producción |
+
+Además:
+
+- **Las reglas de negocio deben validarse en el servidor**: la ventana de 6 h, el
+  cupo de 10, el nivel de la clase, el vencimiento de 30 días, el crédito único
+  por recuperación y los lugares fijos. Hoy viven en `src/lib/logic.js` y se
+  pueden saltar desde el navegador.
+- **La hora de referencia debe ser la del servidor** (zona horaria de Santiago),
+  no la del dispositivo: de ella depende si un aviso genera crédito o no.
+- **Identificadores no adivinables** y comprobación de pertenencia: un alumno no
+  debe poder pedir el crédito o la reserva de otro cambiando un `id`.
+- **Datos personales** (nombre, teléfono; en Niños, datos de menores): definir
+  consentimiento, retención y cifrado, y no cargar datos reales en esta demo.
+- **Eliminar una ficha** borra en cascada sus créditos, asistencias y reservas;
+  en producción conviene decidir si se elimina o se archiva, para conservar el
+  historial.
 
 ## Criterios verificados
 
