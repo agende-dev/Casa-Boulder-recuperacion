@@ -43,8 +43,9 @@ export default function App() {
           <a href="#/" className="flex shrink-0 items-center gap-2.5">
             <Logo />
             <span className="inline-flex flex-col font-display uppercase leading-none">
-              <span className="text-xl font-semibold tracking-wide">Casa Boulder</span>
-              <span className="mt-1 whitespace-nowrap text-[9px] font-medium tracking-[0.14em] text-hold">Gimnasio de Escalada</span>
+              <span className="text-xl font-semibold leading-none tracking-wide">Casa Boulder</span>
+              {/* ml: compensa la sangría de la "C" (≈1 px) frente a la "G" (≈0,4 px) para alinear la tinta */}
+              <span className="ml-[0.55px] mt-[3px] whitespace-nowrap text-[9px] font-medium leading-none tracking-[0.14em] text-hold">Gimnasio de Escalada</span>
             </span>
           </a>
           <nav className="hidden items-center gap-1 md:flex" aria-label="Principal">
