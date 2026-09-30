@@ -65,6 +65,10 @@ export default function ClaseDetalle({ claseId, fecha }) {
   const cerrar = () => setModal(null)
 
   const puedeReservar = !empezada && oc.libres > 0
+  // En la vista Alumno: ¿ya tiene lugar en esta clase?
+  const miFija = !esRecep && oc.fijos.find((f) => f.alumno.id === miAlumno.id)
+  const miRecup = !esRecep && oc.recups.find((r) => r.alumno.id === miAlumno.id)
+  const yaTieneLugar = (miFija && miFija.asistencia?.estado !== 'ausente_avisada') || !!miRecup
 
   return (
     <div>
@@ -93,7 +97,12 @@ export default function ClaseDetalle({ claseId, fecha }) {
               <div className="mt-3"><Presas ocupados={oc.ocupados} cupo={clase.cupo} size="h-3.5 w-3.5" /></div>
             </div>
             <div className="sm:w-64">
-              {puedeReservar ? (
+              {yaTieneLugar ? (
+                <div className="rounded-xl bg-[#d5ead0] p-3 text-sm font-semibold text-[#1f4a17]">
+                  <Icono n="check" className="mr-1 inline h-4 w-4" />
+                  {miRecup ? 'Tienes una recuperación reservada en esta clase.' : 'Esta es tu clase fija: ya tienes tu lugar.'}
+                </div>
+              ) : puedeReservar ? (
                 <Boton as="a" href={`#/reservar?clase=${clase.id}&fecha=${fecha}`} variante="primario" tam="lg" className="w-full">
                   Reservar recuperación
                 </Boton>
@@ -112,7 +121,7 @@ export default function ClaseDetalle({ claseId, fecha }) {
 
       <Seccion titulo={`Alumnos fijos (${oc.fijos.length + oc.externos})`}>
         <Card className="divide-y divide-cement">
-          {oc.fijos.length === 0 && <p className="p-4 text-sm text-graphite/80">Ningún alumno con ficha tiene esta clase como fija.</p>}
+          {esRecep && oc.fijos.length === 0 && <p className="p-4 text-sm text-graphite/80">Ningún alumno con ficha tiene esta clase como fija.</p>}
           {oc.fijos.filter((f) => esRecep || f.alumno.id === miAlumno.id).map(({ alumno, asistencia }) => (
             <div key={alumno.id} className="p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
