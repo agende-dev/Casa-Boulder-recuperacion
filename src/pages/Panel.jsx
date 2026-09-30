@@ -79,8 +79,8 @@ function TarjetaClase({ clase, fecha }) {
   const terminada = startOf(fecha, endHora(clase.hora, clase.duracion)) <= now
   const empezada = inicio <= now
   const llena = oc.libres === 0
-  const estado = terminada ? 'Finalizada' : empezada ? 'En curso' : llena ? 'Completa' : `${oc.libres} ${oc.libres === 1 ? 'lugar libre' : 'lugares libres'}`
-  const tono = terminada || empezada ? 'text-graphite/70' : llena ? 'text-graphite' : oc.libres <= 2 ? 'text-hold-dark' : 'text-[#2c6a1f]'
+  const estado = terminada ? 'Finalizada' : empezada ? 'En curso' : llena ? 'Completa' : oc.libres <= 3 ? (oc.libres === 1 ? '¡Último lugar!' : `¡Últimos ${oc.libres} lugares!`) : null
+  const tono = terminada || empezada ? 'text-graphite/70' : llena ? 'text-graphite' : 'text-hold-dark'
 
   return (
     <a
@@ -92,7 +92,7 @@ function TarjetaClase({ clase, fecha }) {
           <p className="font-display text-2xl font-semibold leading-none text-ink">{clase.hora}</p>
           <p className="mt-0.5 text-xs text-graphite/70">a {endHora(clase.hora, clase.duracion)}</p>
         </div>
-        <span className="font-display text-lg font-semibold leading-none text-ink" aria-label={`${oc.ocupados} de ${clase.cupo} ocupados`}>
+        <span className="font-display text-lg font-semibold leading-none text-ink" aria-label={`${oc.ocupados} de ${clase.cupo} ocupados, ${oc.libres} libres`}>
           {oc.ocupados}/{clase.cupo}
         </span>
       </div>
@@ -103,7 +103,7 @@ function TarjetaClase({ clase, fecha }) {
       <div className="mt-2.5">
         <Presas ocupados={oc.ocupados} cupo={clase.cupo} size="h-1.5 w-1.5 lg:h-2 lg:w-2" />
       </div>
-      <p className={`mt-2 text-xs font-semibold ${tono}`}>{estado}</p>
+      {estado && <p className={`mt-2 text-xs font-semibold ${tono}`}>{estado}</p>}
     </a>
   )
 }
@@ -229,7 +229,7 @@ export default function Panel() {
         </button>
       )}
       <p className="mt-2 text-xs text-graphite/70">
-        Cada círculo es un lugar: <span className="font-semibold">oscuro</span> = ocupado, <span className="font-semibold text-hold-dark">naranja</span> = libre. Lugares libres = 10 − fijos sin aviso − recuperaciones reservadas.
+        Cada círculo es un lugar: <span className="font-semibold">oscuro</span> = ocupado, <span className="font-semibold text-hold-dark">naranja</span> = libre. Avisamos cuando quedan 3 o menos. Lugares libres = 10 − fijos sin aviso − recuperaciones reservadas.
       </p>
     </div>
   )
