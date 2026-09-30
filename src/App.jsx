@@ -44,7 +44,7 @@ export default function App() {
             <Logo />
             <span className="inline-flex flex-col font-display uppercase leading-none">
               <span className="text-xl font-semibold tracking-wide">Casa Boulder</span>
-              <span className="mt-1 text-[11px] font-medium tracking-[0.2em] text-hold">Club</span>
+              <span className="mt-1 whitespace-nowrap text-[9px] font-medium tracking-[0.14em] text-hold">Gimnasio de Escalada</span>
             </span>
           </a>
           <nav className="hidden items-center gap-1 md:flex" aria-label="Principal">
