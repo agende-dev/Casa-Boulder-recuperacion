@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Oswald", "Arial Narrow", sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-cement: #e4e4e1;
+  --color-cement-dark: #cdcdc8;
+  --color-ink: #1b1b1b;
+  --color-graphite: #3a3a3a;
+  --color-hold: #e8641e;
+  --color-hold-dark: #b9490f;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--color-cement);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: 0.02em; }
+button, a, select, input, textarea { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--color-hold); outline-offset: 2px; }
+
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+
+/* textura de cemento sutil */
+.cemento {
+  background-color: var(--color-cement);
+  background-image: radial-gradient(rgba(58,58,58,.06) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
