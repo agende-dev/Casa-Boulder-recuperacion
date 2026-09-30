@@ -42,9 +42,12 @@ export default function App() {
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
           <a href="#/" className="flex shrink-0 items-center gap-2.5">
             <Logo />
-            <span className="font-display text-xl font-semibold uppercase leading-none tracking-wide">
-              Casa Boulder
-              <span className="block text-[10px] font-medium tracking-[0.2em] text-hold">Recuperaciones</span>
+            <span className="inline-flex flex-col font-display uppercase leading-none">
+              <span className="text-xl font-semibold tracking-wide">Casa Boulder</span>
+              {/* "CLUB" repartido de borde a borde para quedar alineado con el ancho del nombre */}
+              <span className="mt-1 flex justify-between text-[11px] font-medium text-hold" aria-label="Club">
+                {'CLUB'.split('').map((l, i) => <span key={i} aria-hidden="true">{l}</span>)}
+              </span>
             </span>
           </a>
           <nav className="hidden items-center gap-1 md:flex" aria-label="Principal">
