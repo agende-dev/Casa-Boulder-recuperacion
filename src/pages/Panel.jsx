@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useApp } from '../store'
 import { NIVELES } from '../lib/seed'
-import { addDays, DIAS, DIAS_CORTO, endHora, fmtCorto, fmtDM, mondayOf, parseISO, startOf, toISO } from '../lib/dates'
-import { ocupacion } from '../lib/logic'
-import { Icono, NivelChip, Presas, Titulo } from '../components/ui'
+import { addDays, DIAS, DIAS_CORTO, endHora, fmtCorto, fmtDM, fmtDuracion, fmtLargo, mondayOf, parseISO, startOf, toISO } from '../lib/dates'
+import { avisarAusencia, getSesion, HORAS_MIN, ocupacion } from '../lib/logic'
+import { Badge, Boton, Icono, Modal, NivelChip, Presas, Titulo } from '../components/ui'
 
 const GUIA_KEY = 'casaboulder.guia.v1'
 const leerGuia = () => {
@@ -72,6 +72,102 @@ function GuiaDemo({ onCerrar }) {
   )
 }
 
+/** Próxima clase del alumno: fijas (salvo las que avisó que no irá) y recuperaciones reservadas. */
+function proximaClase(state, now, alumno) {
+  const hoy = toISO(now)
+  let mejor = null
+  for (let i = 0; i < 42 && !mejor; i++) {
+    const fecha = addDays(hoy, i)
+    const dow = parseISO(fecha).getDay() || 7
+    for (const c of state.clases) {
+      if (c.dia_semana !== dow || startOf(fecha, c.hora) <= now) continue
+      const asis = getSesion(state, c.id, fecha).asistencias.find((a) => a.alumno_id === alumno.id)
+      const fija = alumno.clases_fijas.includes(c.id) && !asis?.estado?.startsWith('ausente')
+      const reserva = state.reservas.find((r) => r.alumno_id === alumno.id && r.estado === 'reservada' && r.clase_id === c.id && r.fecha === fecha)
+      if (!fija && !reserva) continue
+      const cand = { clase: c, fecha, tipo: reserva ? 'recuperacion' : 'fija', inicio: startOf(fecha, c.hora) }
+      if (!mejor || cand.inicio < mejor.inicio) mejor = cand
+    }
+  }
+  return mejor
+}
+
+function ProximaClase() {
+  const { state, now, act, miAlumno } = useApp()
+  const [confirmar, setConfirmar] = useState(false)
+  const p = proximaClase(state, now, miAlumno)
+  const tieneCredito = state.creditos.some((c) => c.alumno_id === miAlumno.id && c.estado === 'activo')
+
+  if (!p) {
+    return (
+      <section className="mt-5 flex flex-col gap-3 rounded-2xl border-l-8 border-hold bg-white p-4 shadow-sm ring-1 ring-black/5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-graphite/70">Tu próxima clase</p>
+          <p className="font-display text-xl font-semibold uppercase text-ink">No tienes clases próximas</p>
+        </div>
+        {tieneCredito && <Boton as="a" href="#/reservar" variante="primario" tam="sm">Usar un crédito</Boton>}
+      </section>
+    )
+  }
+
+  const { clase, fecha, tipo } = p
+  const horas = (p.inicio - now) / 36e5
+  const oc = ocupacion(state, clase, fecha)
+  const puedeAvisar = tipo === 'fija' && horas >= HORAS_MIN
+
+  return (
+    <section className="mt-5 rounded-2xl border-l-8 border-hold bg-white p-4 shadow-sm ring-1 ring-black/5" aria-label="Tu próxima clase">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-wide text-graphite/70">Tu próxima clase</p>
+          <p className="font-display text-2xl font-semibold uppercase leading-tight text-ink">
+            {fmtCorto(fecha)} · {clase.hora}
+          </p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <NivelChip nivel={clase.nivel} />
+            {tipo === 'recuperacion' && <Badge tono="naranja">Recuperación</Badge>}
+            <Badge tono="verde">Empieza en {fmtDuracion(horas)}</Badge>
+            <span className="text-xs text-graphite/80">{oc.libres === 0 ? 'Clase completa' : `${oc.libres} ${oc.libres === 1 ? 'lugar libre' : 'lugares libres'}`}</span>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2 sm:items-end">
+          <div className="flex gap-2">
+            <Boton as="a" href={`#/clase/${clase.id}/${fecha}`} variante="suave" tam="sm" className="flex-1 sm:flex-none">Ver clase</Boton>
+            {puedeAvisar && <Boton variante="primario" tam="sm" className="flex-1 sm:flex-none" onClick={() => setConfirmar(true)}>Avisar ausencia</Boton>}
+          </div>
+          {tipo === 'fija' && !puedeAvisar && <p className="text-xs text-graphite/80 sm:text-right">Faltan menos de {HORAS_MIN} h: un aviso ya no genera crédito.</p>}
+          {tipo === 'recuperacion' && horas < HORAS_MIN && <p className="text-xs text-graphite/80 sm:text-right">Faltan menos de {HORAS_MIN} h: si cancelas, el crédito no se devuelve.</p>}
+        </div>
+      </div>
+
+      <Modal
+        abierto={confirmar}
+        onCerrar={() => setConfirmar(false)}
+        titulo="Avisar ausencia"
+        pie={
+          <>
+            <Boton variante="suave" onClick={() => setConfirmar(false)}>Volver</Boton>
+            <Boton
+              variante="primario"
+              onClick={() => {
+                act(avisarAusencia, { claseId: clase.id, fecha, alumnoId: miAlumno.id }, (r) => (r.conCredito ? 'Listo: recibiste un crédito y tu lugar quedó libre.' : 'Aviso registrado sin crédito (menos de 6 h).'))
+                setConfirmar(false)
+              }}
+            >
+              Confirmar aviso
+            </Boton>
+          </>
+        }
+      >
+        <p>No asistirás a la clase {clase.nivel} del <strong className="text-ink">{fmtLargo(fecha)}</strong> a las {clase.hora}.</p>
+        <p className="mt-3 rounded-xl bg-[#d5ead0] p-3 text-[#1f4a17]">
+          Faltan <strong>{fmtDuracion(horas)}</strong>: recibes <strong>1 crédito</strong> válido por 30 días (hasta el {fmtCorto(addDays(fecha, 30))}) para recuperar en otra clase de tu nivel.
+        </p>
+      </Modal>
+    </section>
+  )
+}
+
 function TarjetaClase({ clase, fecha }) {
   const { state, now, rol, miAlumno } = useApp()
   const oc = ocupacion(state, clase, fecha)
@@ -109,7 +205,7 @@ function TarjetaClase({ clase, fecha }) {
 }
 
 export default function Panel() {
-  const { state, now } = useApp()
+  const { state, now, rol } = useApp()
   const hoy = toISO(now)
   const [semana, setSemana] = useState(() => mondayOf(hoy))
   const [nivel, setNivel] = useState('Todos')
@@ -159,6 +255,7 @@ export default function Panel() {
       </div>
 
       {!guiaOculta && <GuiaDemo onCerrar={cerrarGuia} />}
+      {rol === 'alumno' && <ProximaClase />}
 
       <div className="-mx-4 mt-5 overflow-x-auto px-4" role="group" aria-label="Filtrar por nivel">
         <div className="flex w-max gap-2 pb-1">
