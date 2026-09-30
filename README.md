@@ -1,19 +1,25 @@
-# Casa Boulder — Gestión de recuperaciones
+# Casa Boulder · Gimnasio de Escalada — Gestión de recuperaciones
 
 Que recepción y alumnos sepan al instante qué clases tienen lugar libre y qué
 créditos de recuperación están vigentes, desde el celular.
 
-App de gestión de recuperaciones para un gimnasio de escalada boulder en
-Santiago, con cursos fijos por nivel. Es una demo funcional que corre por
-completo en el navegador: no hay backend ni servicios externos conectados (ver
-"Qué está simulado").
+**Casa Boulder · Gimnasio de Escalada** es una app web para gestionar las clases
+de recuperación de un gimnasio de escalada boulder en Santiago.
+
+**El problema que resuelve:** los alumnos de cursos fijos (Iniciación, Básico,
+Intermedio, Avanzado y Niños) a veces no pueden ir a su clase. Si avisan con
+tiempo, no deberían perderla: pueden recuperarla en otra clase de su mismo nivel
+donde haya cupo.
+
+Es una demo funcional que corre por completo en el navegador: no hay backend ni
+servicios externos conectados (ver "Qué está simulado").
 
 **Stack:** React · Vite · Tailwind CSS · localStorage.
 
 ## Para qué sirve
 
-- Los alumnos de cursos fijos (Iniciación, Básico, Intermedio, Avanzado y
-  Niños) tienen una o dos clases por semana, con cupo de 10 y 90 minutos.
+- Cada alumno tiene una o dos clases fijas por semana (según su plan), de 90
+  minutos y con cupo de 10 personas.
 - Si un alumno avisa que no viene con **6 horas o más** de anticipación, su
   clase se convierte en un **crédito** válido por 30 días para recuperar en otra
   clase de su mismo nivel donde haya lugar.
